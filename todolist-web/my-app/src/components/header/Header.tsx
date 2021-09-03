@@ -12,6 +12,7 @@ import {
   alpha,
 } from "@material-ui/core";
 import { Search, Mail, Notifications, Cancel } from "@material-ui/icons";
+import { useRef } from "react";
 export interface StyleProps{
     open : boolean;
 }
@@ -75,10 +76,18 @@ const useStyles = makeStyles<Theme,StyleProps>((theme:Theme) =>createStyles({
     },
   },
 }));
-
-export default function Header() {
+interface HeaderProps{
+  setSearchQuery: React.Dispatch<React.SetStateAction<string | null>>;
+}
+const Header: React.FC<HeaderProps> = ({setSearchQuery})=>{
   const [open, setOpen] = useState<boolean>(false); //控制搜尋欄
+  const searchRef = useRef<HTMLInputElement>(null);
   const classes = useStyles({open});
+  const handleSearch = ()=>{
+    if(searchRef.current!==null){
+        setSearchQuery(searchRef.current.value.trim())
+    }
+  }
   return (
     <div>
       <AppBar position="fixed">
@@ -91,7 +100,7 @@ export default function Header() {
           </Typography>
           <div className={classes.search}>
             <Search />
-            <InputBase placeholder="搜尋" className={classes.input}></InputBase>
+            <InputBase placeholder="搜尋" className={classes.input} inputRef={searchRef} onChange={handleSearch}></InputBase>
             <Cancel className={classes.cancel}onClick ={()=> setOpen(false)}/>
           </div>
           <div className={classes.icons}>
@@ -113,3 +122,5 @@ export default function Header() {
     </div>
   );
 }
+
+export default Header
