@@ -1,4 +1,4 @@
-import {Entity ,BaseEntity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, PrimaryColumn} from 'typeorm'
+import {Entity ,BaseEntity, Column, ManyToOne, JoinColumn, PrimaryColumn} from 'typeorm'
 import { TodoItem } from './TodoItem';
 
 @Entity('steps')

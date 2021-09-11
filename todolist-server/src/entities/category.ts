@@ -1,4 +1,4 @@
-import {Entity ,BaseEntity, Column, PrimaryGeneratedColumn,ManyToMany, JoinTable, JoinColumn, ManyToOne, PrimaryColumn} from 'typeorm'
+import {Entity ,BaseEntity, Column,ManyToMany, JoinTable, JoinColumn, ManyToOne, PrimaryColumn} from 'typeorm'
 import { TodoItem } from './TodoItem';
 import { User } from './user';
 

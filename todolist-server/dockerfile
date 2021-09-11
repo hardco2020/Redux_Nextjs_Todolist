@@ -1,0 +1,22 @@
+FROM node:14
+
+ENV NODE_ENV production
+
+WORKDIR /user/src/api
+
+COPY package.json .
+COPY yarn.lock .
+
+
+RUN yarn install
+RUN yarn global add typescript
+COPY . .
+
+RUN yarn build
+COPY .env ./dist/
+WORKDIR ./dist
+
+EXPOSE 3000
+
+
+CMD node index.js

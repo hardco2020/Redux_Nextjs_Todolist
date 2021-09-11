@@ -1,4 +1,4 @@
-import {Entity ,BaseEntity, Column, PrimaryGeneratedColumn, OneToMany, ManyToMany, PrimaryColumn} from 'typeorm'
+import {Entity ,BaseEntity, Column, OneToMany, ManyToMany, PrimaryColumn} from 'typeorm'
 import { Category } from './category';
 import { Step } from './step';
 
