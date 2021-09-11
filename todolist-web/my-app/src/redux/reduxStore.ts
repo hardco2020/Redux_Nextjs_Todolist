@@ -1,10 +1,15 @@
 import {configureStore} from  '@reduxjs/toolkit'
+import categorySlice from './categorySlice'
+import stepSlice from './stepSlice'
 
 import todoReducer from './todoSlice'
-
+import userSlice from './userSlice'
 export const store =  configureStore({
     reducer:{
         todo : todoReducer,
+        user : userSlice,
+        category: categorySlice,
+        step : stepSlice
     }
 })
 

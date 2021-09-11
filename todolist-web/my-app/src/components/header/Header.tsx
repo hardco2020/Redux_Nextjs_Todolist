@@ -6,13 +6,17 @@ import {
   createStyles,
   Toolbar,
   Typography,
-  Badge,
   Avatar,
   Theme,
   alpha,
+  Button,
 } from "@material-ui/core";
-import { Search, Mail, Notifications, Cancel } from "@material-ui/icons";
+import { Search,Cancel } from "@material-ui/icons";
 import { useRef } from "react";
+import LanguageOption from "../language/language";
+import { useTranslation } from "react-i18next";
+import { useHistory} from 'react-router-dom'
+import Cookies from "js-cookie";
 export interface StyleProps{
     open : boolean;
 }
@@ -80,6 +84,8 @@ interface HeaderProps{
   setSearchQuery: React.Dispatch<React.SetStateAction<string | null>>;
 }
 const Header: React.FC<HeaderProps> = ({setSearchQuery})=>{
+  const history = useHistory();
+  const { t } = useTranslation();
   const [open, setOpen] = useState<boolean>(false); //控制搜尋欄
   const searchRef = useRef<HTMLInputElement>(null);
   const classes = useStyles({open});
@@ -87,6 +93,10 @@ const Header: React.FC<HeaderProps> = ({setSearchQuery})=>{
     if(searchRef.current!==null){
         setSearchQuery(searchRef.current.value.trim())
     }
+  }
+  const logout = ()=>{
+    Cookies.remove('user')
+    history.push('/')
   }
   return (
     <div>
@@ -100,7 +110,7 @@ const Header: React.FC<HeaderProps> = ({setSearchQuery})=>{
           </Typography>
           <div className={classes.search}>
             <Search />
-            <InputBase placeholder="搜尋" className={classes.input} inputRef={searchRef} onChange={handleSearch}></InputBase>
+            <InputBase placeholder={t("search")} className={classes.input} inputRef={searchRef} onChange={handleSearch} ></InputBase>
             <Cancel className={classes.cancel}onClick ={()=> setOpen(false)}/>
           </div>
           <div className={classes.icons}>
@@ -108,14 +118,17 @@ const Header: React.FC<HeaderProps> = ({setSearchQuery})=>{
               className={classes.searchButton}
               onClick={() => setOpen(!open)}
             />
-            <Badge badgeContent={4} color="primary" className={classes.badge}>
+
+            <LanguageOption/>
+            {/* <Badge badgeContent={4} color="primary" className={classes.badge}>
               <Mail />
             </Badge>
 
             <Badge badgeContent={4} color="primary" className={classes.badge}>
               <Notifications />
-            </Badge>
-            <Avatar alt="Remy Sharp" src="/broken-image.jpg" />
+            </Badge> */}
+            <Avatar alt={Cookies.get('user')} src="/broken-image.jpg" />
+            <Button onClick={()=>logout()}>Sign out </Button>
           </div>
         </Toolbar>
       </AppBar>

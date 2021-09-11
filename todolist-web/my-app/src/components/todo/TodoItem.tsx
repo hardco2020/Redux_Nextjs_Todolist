@@ -1,11 +1,12 @@
-import { ListItem, ListItemText, Typography, ListItemSecondaryAction, Drawer, createStyles, makeStyles, Theme } from '@material-ui/core'
+import { ListItem, ListItemText, Typography, ListItemSecondaryAction,createStyles, makeStyles, Theme } from '@material-ui/core'
 import { RadioButtonUnchecked, Notifications, EventNote, ErrorOutline, MoreVert, Star, StarBorder, CheckCircle } from '@material-ui/icons'
 import moment from 'moment'
-import React, { useState } from 'react'
-import { useAppDispatch } from '../../redux/hook'
-import { completeTodo, updateTodo } from '../../redux/todoSlice'
+import React from 'react'
+import { useTranslation } from 'react-i18next'
+import { seeCategories } from '../../redux/categorySlice'
+import { useAppDispatch, useAppSelector } from '../../redux/hook'
+import { AddTodosToCatgory, CompleteTodosByTodoID, DeleteTodosToCatgory, updateTodo } from '../../redux/todoSlice'
 import { Todo } from '../../type'
-import Rightbar from '../rightbar/Rightbar'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -66,47 +67,59 @@ const useStyles = makeStyles((theme: Theme) =>
 interface TodoItemProp{
     todo:Todo;
     completed:boolean;
+    setCurrentTodoId: React.Dispatch<React.SetStateAction<string | null>>;
 }
-const TodoItem:React.FC<TodoItemProp> = ({todo,completed})=> {
+const TodoItem:React.FC<TodoItemProp> = ({todo,completed,setCurrentTodoId})=> {
+    const {t} = useTranslation();
     const dispatch = useAppDispatch();
+    const importantCategory = useAppSelector(seeCategories).find((c)=>c.name==="important")
     const addImportantCategory = (todo: Todo) => {
-        //原本有跟原本沒有的狀況
-        let new_cat: number[];
-        if (todo.categories !== undefined) {
-          new_cat = [...todo.categories, 2];
-        } else {
-          new_cat = [2];
+        if(importantCategory){
+          dispatch(AddTodosToCatgory({todoId:todo.id,categoryId:importantCategory.id}))
         }
-        const newTodo: Todo = { ...todo, categories: new_cat };
-        dispatch(updateTodo(newTodo));
+        //原本有跟原本沒有的狀況
+        // let new_cat: number[];
+        // if (todo.categories !== undefined) {
+        //   new_cat = [...todo.categories, 2];
+        // } else {
+        //   new_cat = [2];
+        // }
+        // const newTodo: Todo = { ...todo, categories: new_cat };
+        // dispatch(updateTodo(newTodo));
       };
       const deleteImportantCategory = (todo: Todo) => {
-        if (todo.categories !== undefined) {
-          const new_cat = todo.categories.filter((c) => c !== 2);
-          const newTodo: Todo = { ...todo, categories: new_cat };
-          dispatch(updateTodo(newTodo));
-        } else {
-          console.log("不用親增");
+        if(importantCategory){
+          dispatch(DeleteTodosToCatgory({todoId:todo.id,categoryId:importantCategory.id}))
         }
+        // if (todo.categories !== undefined) {
+        //   const new_cat = todo.categories.filter((c) => c !== 2);
+        //   const newTodo: Todo = { ...todo, categories: new_cat };
+        //   dispatch(updateTodo(newTodo));
+        // } else {
+        //   console.log("不用親增");
+        // }
     };
+    const completeTodo = (event:React.MouseEvent<SVGSVGElement, MouseEvent>)=>{
+      event.stopPropagation();
+      dispatch(CompleteTodosByTodoID({todoId:todo.id,completed:completed}))
+    }
     const classes = useStyles();
     console.log("re-render?")
-    const [drawerState,setDrawerState] = useState<boolean>(false);
     return (
         <>
         <ListItem
           button
           divider
-          onClick ={()=>setDrawerState(true)}
-          // onClick={() => setCurrentTodoId(todo.id)}
+          // onClick ={ondrawerClick}
+          onClick={() => setCurrentTodoId(todo.id)}
           className ={classes.listItem}
         >
         {completed === true ?  <CheckCircle
                        className={classes.checkIcon}
-                       onClick={() => dispatch(completeTodo(todo.id))}
+                       onClick={(e) => completeTodo(e)}
                      />:<RadioButtonUnchecked
             className={classes.checkIcon}
-            onClick={() => dispatch(completeTodo(todo.id))}
+            onClick={(e)=> completeTodo(e)}
           />
         
         }
@@ -124,8 +137,15 @@ const TodoItem:React.FC<TodoItemProp> = ({todo,completed})=> {
                        component={'span'}
                         variant="body2"
                         className={classes.subTodoText}
+                        style={
+                          moment().isAfter(moment(todo.noticeTime))===true
+                            ? { color: "red" }
+                            : undefined
+                        }
                       >
-                        {" "}
+                        {moment().isAfter(moment(todo.noticeTime))===true
+                          ? t("expired")+", "
+                          : ""}
                         {moment(todo.noticeTime).format("MM-DD-HH:mm")}{" "}
                       </Typography>
                     </>
@@ -145,7 +165,7 @@ const TodoItem:React.FC<TodoItemProp> = ({todo,completed})=> {
                       >
                         {""}
                         {moment().isAfter(moment(todo.dueTime))===true
-                          ? "過期, "
+                          ? t("expired")+", "
                           : ""}
                         {moment(todo.dueTime).format("MM-DD-HH:mm")}{" "}
                       </Typography>
@@ -160,7 +180,7 @@ const TodoItem:React.FC<TodoItemProp> = ({todo,completed})=> {
                         className={classes.subTodoText}
                       >
                         {" "}
-                        附註
+                        {t('note')}
                       </Typography>
                     </>
                   )}
@@ -186,16 +206,14 @@ const TodoItem:React.FC<TodoItemProp> = ({todo,completed})=> {
             }
           />
           <ListItemSecondaryAction>
-            {todo.categories && todo.categories?.includes(2) ? (
+            {todo.categories && todo.categories?.some((category)=>category.name==="important") ? (
               <Star onClick={() => deleteImportantCategory(todo)} />
             ) : (
               <StarBorder onClick={() => addImportantCategory(todo)} />
             )}
           </ListItemSecondaryAction>
         </ListItem>
-        <Drawer anchor="right" open={drawerState} onClose={()=>setDrawerState(false)}> 
-          <Rightbar currentTodoId={todo.id}/>
-        </Drawer>
+       
         </>
     )
 }

@@ -1,9 +1,13 @@
-import { makeStyles, Theme } from "@material-ui/core";
-import { useState } from "react";
+import { Drawer, makeStyles, Theme } from "@material-ui/core";
+import Cookies from "js-cookie";
+import { useEffect, useState } from "react";
 import Feed  from "../components/feed/Feed";
 //import Footer from "./components/footer/Footer";
 import Header from "../components/header/Header";
+import Rightbar from "../components/rightbar/Rightbar";
 import Sidebar from "../components/sidebar/Sidebar";
+import { useAppDispatch } from "../redux/hook";
+import { getTodosByUser } from "../redux/todoSlice";
 
 export interface homeProps{
     categoryId?:number
@@ -56,10 +60,19 @@ const useStyles = makeStyles<Theme,StyleProps>((theme:Theme)=>({
   
 }));
 const Home: React.FC<homeProps> =({categoryId})=> {
+  //-----------Redux
+  const dispatch = useAppDispatch();
   const [ sidebarTextState,setSidebarTextState] = useState<boolean>(false);
-  const [ currentTodoId, setCurrentTodoId] = useState<number|null>(null);
+  const [ currentTodoId, setCurrentTodoId] = useState<string|null>(null);
   const [ searchQuery , setSearchQuery] = useState<string|null>(null);
   const classes = useStyles({sidebarTextState});
+
+  useEffect(() => {
+    const userId = Cookies.get('user')
+    if(userId!==undefined){
+      dispatch(getTodosByUser(userId))
+    }
+  }, [])
   //加入search控制在此處
   //when true mean sidebar is wild 
   return (
@@ -73,6 +86,9 @@ const Home: React.FC<homeProps> =({categoryId})=> {
           <div className={classes.feed}>
           <Feed setCurrentTodoId = {setCurrentTodoId} categoryId={categoryId} search={searchQuery}/>
           </div>
+          <Drawer anchor="right" open={currentTodoId!==null} onClose={()=>setCurrentTodoId(null)} > 
+          <Rightbar currentTodoId={currentTodoId} setCurrentTodoId={setCurrentTodoId}/>
+          </Drawer>
           {/* <div className={classes.rightbar} style={{display: currentTodoId ? "" : "none"}}>
           <Rightbar currentTodoId={currentTodoId}/>
           </div> */}

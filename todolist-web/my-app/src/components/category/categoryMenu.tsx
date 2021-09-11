@@ -8,10 +8,12 @@ import {
   Typography,
 } from "@material-ui/core";
 import { Dns } from "@material-ui/icons";
+import { id } from "date-fns/locale";
 import React, { useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
+import { DeleteCategoryById, updateCategoryAction } from "../../redux/categorySlice";
+import { deleteTodoByRelated} from "../../redux/todoSlice"
 import { useAppDispatch } from "../../redux/hook";
-import { deleteCategory,updateCategory } from "../../redux/todoSlice";
 import { category, Todo } from "../../type";
 
 export interface StyleProps {
@@ -62,6 +64,7 @@ const Category: React.FC<categoryProps> = ({ c, todos, sidebarTextState,setSearc
   //-----------------Redux
   const dispatch = useAppDispatch();
   //-----------------local state
+  const history = useHistory();
   const newCategoryRef = useRef<HTMLInputElement>(null);
   const [changeCategoryState, setChangeCategoryState] =
     useState<boolean>(false);
@@ -89,8 +92,10 @@ const Category: React.FC<categoryProps> = ({ c, todos, sidebarTextState,setSearc
     id: number
   ) => {
     event.preventDefault();
-    dispatch(deleteCategory(id));
+    dispatch(DeleteCategoryById(id.toString()));
+    // dispatch(deleteTodoByRelated(id.toString()));
     setPopState(popInitialPos);
+    history.push('/list/1')
   };
   const changePopCategory = (
     event: React.MouseEvent<HTMLElement>,
@@ -107,7 +112,7 @@ const Category: React.FC<categoryProps> = ({ c, todos, sidebarTextState,setSearc
   const changeCategoryName = ()=>{
     if(newCategoryRef.current){
       if(newCategoryRef.current.value.trim()!==""){
-        dispatch(updateCategory({newName:newCategoryRef.current.value.trim(),id:c.id}))
+        dispatch(updateCategoryAction({categoryId:c.id.toString(),name:newCategoryRef.current.value.trim()}))
       }
     }
     setChangeCategoryState(false)
@@ -137,12 +142,12 @@ const Category: React.FC<categoryProps> = ({ c, todos, sidebarTextState,setSearc
         <Typography className={classes.text} style={{ marginLeft: "auto" }}>
           {todos.filter(
             (todo) =>
-              todo.categories?.includes(c.id) && todo.completed === false
+              todo.categories?.some((category)=>category.id === c.id) && todo.completed === false
           ).length === 0
             ? null
             : todos.filter(
                 (todo) =>
-                  todo.categories?.includes(c.id) && todo.completed === false
+                todo.categories?.some((category)=>category.id === c.id) && todo.completed === false
               ).length}
         </Typography>
         <Menu
@@ -160,7 +165,7 @@ const Category: React.FC<categoryProps> = ({ c, todos, sidebarTextState,setSearc
             修改此清單名稱
           </MenuItem>
           <MenuItem
-            onClick={(e) => deletePopCategory(e, c.id)}
+            onClick={(e) => deletePopCategory(e, parseInt(c.id))}
             className={classes.deletePop}
           >
             刪除此清單

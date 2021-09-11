@@ -22,16 +22,16 @@ import {
   RadioButtonUnchecked,
   SearchOutlined,
 } from "@material-ui/icons";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../redux/hook";
 import {
-  deleteCategory,
-  showCategories,
+
+  AddTodosByCategory,
   showTodo,
-  updateCategory,
 } from "../../redux/todoSlice";
-import { addTodo } from "../../redux/todoSlice";
+import { DeleteCategoryById, seeCategories, updateCategoryAction } from  '../../redux/categorySlice'
 // import TodoDrawer from "../drawer/Drawer";
 import TodoItem from "../todo/TodoItem";
 
@@ -123,7 +123,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 interface feedProps {
-  setCurrentTodoId: React.Dispatch<React.SetStateAction<number | null>>;
+  setCurrentTodoId: React.Dispatch<React.SetStateAction<string| null>>;
   categoryId?: number;
   search?: string | null;
 }
@@ -134,16 +134,32 @@ const Feed: React.FC<feedProps> = ({
   search,
 }) => {
   //-----------Redux state management
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
-  const category = useAppSelector(showCategories)?.find(
-    (c) => c.id === parseInt(id)
-  );
+  const category = useAppSelector(seeCategories)?.find(
+    (c) =>{ 
+        if(parseInt(id)===1){
+          return c.name === "myday"
+        }else if (parseInt(id)===2){
+          return c.name === "important"
+        }else if (parseInt(id)===3){
+          return c.name === "plan"
+        }else if (parseInt(id)===4){
+          return c.name === "work"
+        }else{
+          return c.id.toString()===id
+        }
+
+  });
+  //category會是我們要的 所以return todo裡面contain category的就行了
   const todos = useAppSelector(showTodo).filter((todo) => {
-    if (parseInt(id) !== 3) {
-      return todo.categories?.includes(parseInt(id));
+    if (category && category.name !== "plan") {
+      if(todo.categories!==undefined){
+        return todo.categories.some((c)=>c.name===category.name)
+      }
     } else {
       //回傳有到期日的旋向
-      return todo.dueTime !== undefined;
+      return todo.dueTime !== null;
     }
   });
   const dispatch = useAppDispatch();
@@ -168,12 +184,15 @@ const Feed: React.FC<feedProps> = ({
     if (newTodo.current) {
       if (newTodo.current.value.trim() !== "") {
         console.log(newTodo.current?.value);
-        dispatch(
-          addTodo({
-            title: newTodo.current.value.trim(),
-            category: parseInt(id),
-          })
-        );
+        if(category){
+          dispatch(
+            AddTodosByCategory({
+              categoryId:category.id,
+              title: newTodo.current.value.trim(),
+              completed:false
+            })
+          );
+        }
         newTodo.current.value = "";
       }
       setAddTodoState(false);
@@ -184,16 +203,16 @@ const Feed: React.FC<feedProps> = ({
     id: number
   ) => {
     event.preventDefault();
-    dispatch(deleteCategory(id));
+    dispatch(DeleteCategoryById(id.toString()));
     history.push("/list/1");
   };
   const modifyCategory = () => {
     if (newCategoryRef.current) {
       if (newCategoryRef.current.value.trim() !== "") {
         dispatch(
-          updateCategory({
-            newName: newCategoryRef.current.value.trim(),
-            id: parseInt(id),
+          updateCategoryAction({
+            categoryId:id,
+            name: newCategoryRef.current.value.trim()
           })
         );
       }
@@ -205,6 +224,11 @@ const Feed: React.FC<feedProps> = ({
       modifyCategory();
     }
   };
+  // useEffect(() => {
+  //   if(category && category.id){
+  //     dispatch(getTodosByCategory(category.id))
+  //   }
+  // }, [category,dispatch])
   //-----------------------------components
   const SearchOn = () => {
     //此處利用selector 做filter
@@ -227,7 +251,7 @@ const Feed: React.FC<feedProps> = ({
           className={classes.todoTitle}
         >
           <SearchOutlined className={classes.icon} />
-          正在搜尋 "{search}"
+          {t("onSearch")} "{search}"
         </Typography>
         <List component="nav" aria-label="mailbox folders">
           {todos ? (
@@ -237,6 +261,7 @@ const Feed: React.FC<feedProps> = ({
                   todo={todo}
                   completed={todo.completed}
                   key={todo.id}
+                  setCurrentTodoId={setCurrentTodoId}
                 />
               );
             })
@@ -256,10 +281,10 @@ const Feed: React.FC<feedProps> = ({
   const TodoOn = () => {
     return (
       <Container className={classes.container}>
-        <div className={classes.titleArea}>
+        <div className={classes.titleArea}> 
           {modifyCategoryState === false ? (
             (parseInt(id) > 5) === true ? (
-              <Tooltip title="點擊修改清單">
+              <Tooltip title={t("changeTip")||""}>
                 <Typography
                   component={"span"}
                   variant="h5"
@@ -277,7 +302,7 @@ const Feed: React.FC<feedProps> = ({
                 className={classes.todoTitle}
               >
                 <AcUnit className={classes.icon} />
-                {category && category.name}
+                {category && t(category.name)}
               </Typography>
             )
           ) : (
@@ -307,7 +332,7 @@ const Feed: React.FC<feedProps> = ({
           <TextField
             className={classes.addTodo}
             id="addTask"
-            placeholder="新增工作"
+            placeholder={t("addWork")}
             aria-label="新增工作"
             inputRef={newTodo}
             onBlur={AddTodo}
@@ -337,7 +362,7 @@ const Feed: React.FC<feedProps> = ({
           <Divider />
           {todos.map((todo) => {
             if (todo.completed === false) {
-              return <TodoItem todo={todo} completed={false} key={todo.id} />;
+              return <TodoItem todo={todo} completed={false} key={todo.id} setCurrentTodoId={setCurrentTodoId} />;
             } else {
               return null;
             }
@@ -357,13 +382,13 @@ const Feed: React.FC<feedProps> = ({
                     <ArrowDownward className={classes.checkIcon} />
                   )}
                   <ListItemText
-                    primary={`完成      ${finishedTodos.length}`}
+                    primary={t('finished') + "  "+finishedTodos.length }
                     style={{ color: "tomato" }}
                   />
                 </ListItem>
                 <div style={displayFinished ? { display: "none" } : undefined}>
                   {finishedTodos.map((todo) => (
-                    <TodoItem todo={todo} completed={true} key={todo.id} />
+                    <TodoItem todo={todo} completed={true} key={todo.id} setCurrentTodoId={setCurrentTodoId} />
                   ))}
                 </div>
               </List>

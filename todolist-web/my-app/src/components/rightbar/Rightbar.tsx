@@ -17,6 +17,7 @@ import {
 } from "@material-ui/core";
 import {
   Add,
+  ArrowForward,
   CalendarToday,
   CheckCircle,
   Clear,
@@ -28,31 +29,36 @@ import {
   Repeat,
   WbSunny,
 } from "@material-ui/icons";
-import { current } from "@reduxjs/toolkit";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
-import { useAppDispatch } from "../../redux/hook";
+import { seeCategories } from "../../redux/categorySlice";
+import { useAppDispatch, useAppSelector } from "../../redux/hook";
 import { RootState } from "../../redux/reduxStore";
+import { AddStepsByTodo, getStepsByTodo, seeSteps } from "../../redux/stepSlice";
 import {
-  completeTodo,
   updateTodo,
-  updateStep,
-  addStepReducer,
-  deleteStepReducer,
-  deleteTodo,
+  UpdateTodosByTodoID,
+  AddTodosToCatgory,
+  DeleteTodosToCatgory,
+  CompleteTodosByTodoID,
+  DeleteTodosByTodoID
 } from "../../redux/todoSlice";
-import { Todo, step, payloadStep } from "../../type";
+import { Todo,payloadStep } from "../../type";
+import Step from "../step/Step";
 
-export interface StyleProps {}
 
-const useStyles = makeStyles<Theme, StyleProps>((theme: Theme) =>
+const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     container: {
-      paddingTop: theme.spacing(10),
+      paddingTop: theme.spacing(8),
       height: "100vh",
       color: "#555",
+    },
+    backIcon:{
+      marginLeft:theme.spacing(2)
     },
     taskName: {},
     list: {
@@ -94,11 +100,16 @@ const useStyles = makeStyles<Theme, StyleProps>((theme: Theme) =>
   })
 );
 interface rightbarProps {
-  currentTodoId: number | null;
+  currentTodoId: string | null;
+  setCurrentTodoId: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
-const Rightbar: React.FC<rightbarProps> = ({ currentTodoId }) => {
+const Rightbar: React.FC<rightbarProps> = ({ currentTodoId,setCurrentTodoId }) => {
   // global state management
+
+  const category = useAppSelector(seeCategories).find((c)=>c.name==="myday")
+  const steps = useAppSelector(seeSteps)
+  const { t } = useTranslation(); 
   const todos = useSelector((state: RootState) =>
     state.todo.todos.filter((todo) => todo.id === currentTodoId)
   );
@@ -124,38 +135,20 @@ const Rightbar: React.FC<rightbarProps> = ({ currentTodoId }) => {
   //   console.table(currentTodo);
   // }, [currentTodo]);
   //--------------------------------local function
-  const completeStep = (oldStep: step) => {
-    if (currentTodo.steps !== undefined) {
-      const payload: payloadStep = {
-        todoId: currentTodo.id,
-        stepId: oldStep.id,
-        step: { ...oldStep, completed: !oldStep.completed },
-      };
-      console.log(payload);
-      dispatch(updateStep(payload));
-    }
-  };
   const onKeyPressAddStep = (event: React.KeyboardEvent) => {
     if (event.key === "Enter") {
       addStep();
     }
-  };
-  const deleteStep = (id: number) => {
-    //根據id 做 filter
-    const payload: payloadStep = { todoId: currentTodo.id, stepId: id };
-    dispatch(deleteStepReducer(payload));
   };
   const addStep = () => {
     if (addStepRef.current != null) {
       if (addStepRef.current.value !== "") {
         //check original todos for have steps or not?
         const newStep = {
-          id: Date.now(),
           completed: false,
           title: addStepRef.current.value,
         };
-        const payload: payloadStep = { todoId: currentTodo.id, step: newStep };
-        dispatch(addStepReducer(payload));
+        dispatch(AddStepsByTodo({todoId:currentTodo.id,new_step:newStep}));
         addStepRef.current.value = "";
       }
       setAddStepState(false);
@@ -169,12 +162,12 @@ const Rightbar: React.FC<rightbarProps> = ({ currentTodoId }) => {
   const updateTodoNote = () => {
     if (noteRef.current != null) {
       if (noteRef.current.value !== "") {
-        console.log(noteRef.current.value);
         const newTodo: Todo = {
           ...currentTodo,
           note: noteRef.current.value.trim(),
         };
-        dispatch(updateTodo(newTodo));
+        console.log(newTodo)
+        dispatch(UpdateTodosByTodoID(newTodo));
       }
     }
   };
@@ -207,22 +200,28 @@ const Rightbar: React.FC<rightbarProps> = ({ currentTodoId }) => {
       console.table(currentTodo);
       const newTodo: Todo = { ...currentTodo, dueTime: DueDate };
       console.table(newTodo);
-      dispatch(updateTodo(newTodo));
+      dispatch(UpdateTodosByTodoID(newTodo));
     }
     setAnchorDueDate(null);
   };
+  
   useEffect(() => {
-    if (updateTitle.current !== null && currentTodo !== null) {
-      updateTitle.current.value = currentTodo?.title;
+    if(currentTodoId){
+      dispatch(getStepsByTodo(currentTodoId))
     }
-    if (
-      noteRef.current !== null &&
-      currentTodo !== null &&
-      currentTodo?.note !== undefined
-    ) {
-      noteRef.current.value = currentTodo.note;
-    }
-  }, [currentTodo]);
+  }, [currentTodoId,dispatch])
+  // useEffect(() => {
+  //   if (updateTitle.current !== null && currentTodo !== null) {
+  //     updateTitle.current.value = currentTodo?.title;
+  //   }
+  //   if (
+  //     noteRef.current !== null &&
+  //     currentTodo !== null &&
+  //     currentTodo?.note !== undefined
+  //   ) {
+  //     noteRef.current.value = currentTodo.note;
+  //   }
+  // }, [currentTodo]);
   const openNoticeMenu = (event: React.MouseEvent<HTMLDivElement>) => {
     setAnchorNotice(event.currentTarget);
   };
@@ -250,7 +249,7 @@ const Rightbar: React.FC<rightbarProps> = ({ currentTodoId }) => {
     }
     if (currentTodo !== null && noticeDate !== null && noticeDate!=="Invalid date") {
       const newTodo: Todo = { ...currentTodo, noticeTime: noticeDate };
-      dispatch(updateTodo(newTodo));
+      dispatch(UpdateTodosByTodoID(newTodo));
     }
     setAnchorNotice(null);
   };
@@ -271,47 +270,44 @@ const Rightbar: React.FC<rightbarProps> = ({ currentTodoId }) => {
         ...currentTodo,
         title: updateTitle.current.value.trim(),
       };
-      dispatch(updateTodo(newTodo));
+      dispatch(UpdateTodosByTodoID(newTodo));
       updateTitle.current.value = "";
       updateTitle.current.blur();
     }
   };
   const deleteDueTime = () => {
     if (currentTodo !== null) {
-      const { dueTime, ...rest } = currentTodo;
-      dispatch(updateTodo(rest));
+      let new_todo = Object.assign({}, currentTodo);
+      new_todo.dueTime =null 
+      dispatch(UpdateTodosByTodoID(new_todo));
     }
   };
   const deleteNoticeTime = () => {
     if (currentTodo !== null) {
-      const { noticeTime, ...rest } = currentTodo;
-      dispatch(updateTodo(rest));
+      let new_todo = Object.assign({}, currentTodo);
+      new_todo.noticeTime = null  
+      // const { noticeTime, ...rest } = currentTodo;
+      dispatch(UpdateTodosByTodoID(new_todo));
     }
   };
   const addCategoryMyday = (todo:Todo)=>{
-    let new_cat: number[];
-    if (todo.categories !== undefined) {
-      new_cat = [...todo.categories, 1];
-    } else {
-      new_cat = [1];
+    //找到該user 我的一天的id 加上本身id去做更新
+    if(category){
+      dispatch(AddTodosToCatgory({categoryId:category.id,todoId:todo.id}));
     }
-    const newTodo: Todo = { ...todo, categories: new_cat };
-    dispatch(updateTodo(newTodo));
   }
   const deleteCategoryMyday = (todo: Todo) => {
-    if (todo.categories !== undefined) {
-      const new_cat = todo.categories.filter((c) => c !== 1);
-      const newTodo: Todo = { ...todo, categories: new_cat };
-      dispatch(updateTodo(newTodo));
-    } else {
-      console.log("不用親增");
+    if(category){
+      dispatch(DeleteTodosToCatgory({categoryId:category.id,todoId:todo.id}));
     }
   };
   const deleteTask = ()=>{
-    dispatch(deleteTodo(currentTodo.id))
+      dispatch(DeleteTodosByTodoID(currentTodo.id))
+      setCurrentTodoId(null)
   }
   return (
     <Container className={classes.container}>
+      <ArrowForward className={classes.backIcon} onClick={()=>setCurrentTodoId(null)}/>
       <List
         component="nav"
         className={classes.list}
@@ -321,12 +317,12 @@ const Rightbar: React.FC<rightbarProps> = ({ currentTodoId }) => {
           {currentTodo && currentTodo.completed === false ? (
             <RadioButtonUnchecked
               className={classes.checkIcon}
-              onClick={() => dispatch(completeTodo(currentTodo.id))}
+              onClick={() => dispatch(CompleteTodosByTodoID({todoId:currentTodo.id,completed:true}))}
             />
           ) : (
             <CheckCircle
               className={classes.checkIcon}
-              onClick={() => dispatch(completeTodo(currentTodo.id))}
+              onClick={() => dispatch(CompleteTodosByTodoID({todoId:currentTodo.id,completed:false}))}
             />
           )}
           <TextField
@@ -354,7 +350,7 @@ const Rightbar: React.FC<rightbarProps> = ({ currentTodoId }) => {
         <ListItem className={classes.listItem}>
           <TextField
             id="addStep"
-            placeholder="新增步驟"
+            placeholder={t("addStep")}
             aria-label="新增步驟"
             inputRef={addStepRef}
             onKeyPress={(e) => onKeyPressAddStep(e)}
@@ -376,38 +372,10 @@ const Rightbar: React.FC<rightbarProps> = ({ currentTodoId }) => {
             }}
           />
         </ListItem>
-        {currentTodo !== undefined &&
-          currentTodo.steps !== undefined &&
-          currentTodo?.steps.map((step) => (
-            <ListItem button divider key={step.id}>
-              {step.completed === false ? (
-                <RadioButtonUnchecked
-                  onClick={() => completeStep(step)}
-                  className={classes.stepIcon}
-                  style={{ color: "tomato" }}
-                />
-              ) : (
-                <CheckCircle
-                  onClick={() => completeStep(step)}
-                  className={classes.stepIcon}
-                  style={{ color: "tomato" }}
-                />
-              )}
-              <TextField
-                defaultValue={step.title}
-                value={step.title}
-                fullWidth={true}
-                InputProps={{
-                  disableUnderline: true,
-                }}
-              />
-              <ListItemSecondaryAction
-                onClick={() => deleteStep(step.id)}
-                className={classes.deleteButton}
-              >
-                <Clear />
-              </ListItemSecondaryAction>
-            </ListItem>
+        {
+          steps &&
+          steps.map((step) => (
+            <Step currentTodo={currentTodo} step={step} />
           ))}
       </List>
 
@@ -416,7 +384,7 @@ const Rightbar: React.FC<rightbarProps> = ({ currentTodoId }) => {
         className={classes.list}
         aria-label="mailbox folders"
       >
-        <ListItem button className={classes.listItem}  onClick={()=>currentTodo?.categories && currentTodo.categories.includes(1) ? deleteCategoryMyday(currentTodo): addCategoryMyday(currentTodo)}>
+        <ListItem button className={classes.listItem}  onClick={()=>currentTodo?.categories && currentTodo.categories.some((c)=>c.name === "myday") ? deleteCategoryMyday(currentTodo): addCategoryMyday(currentTodo)}>
           <WbSunny className={classes.checkIcon} />
           <ListItemText
             disableTypography
@@ -425,14 +393,14 @@ const Rightbar: React.FC<rightbarProps> = ({ currentTodoId }) => {
                 component={'span'}
                 variant="body2"
                 style={
-                  currentTodo?.categories && currentTodo.categories.includes(1)
+                  currentTodo?.categories && currentTodo.categories.some((c)=>c.name === "myday")
                     ? { color: "tomato" }
                     : undefined
                 }
               >
-                {currentTodo?.categories && currentTodo.categories.includes(1)
-                  ? "已新增到 [我的一天] "
-                  : "新增到我的一天"}
+                {currentTodo?.categories && currentTodo.categories.some((c)=>c.name === "myday")
+                  ? t("already_add_to_my_day")
+                  : t("add_to_my_day")}
               </Typography>
             }
           />
@@ -450,8 +418,8 @@ const Rightbar: React.FC<rightbarProps> = ({ currentTodoId }) => {
             style={currentTodo?.noticeTime ? { color: "tomato" } : undefined}
             primary={
               currentTodo?.noticeTime
-                ? "於 " + moment(currentTodo.noticeTime).format("MM-DD-HH:mm") + " 提醒我"
-                : "提醒我"
+                ? moment(currentTodo.noticeTime).format("MM-DD-HH:mm") + t("notification")
+                : t("notification")
             }
           />
           <Menu
@@ -467,7 +435,7 @@ const Rightbar: React.FC<rightbarProps> = ({ currentTodoId }) => {
               <ListItemIcon>
                 <Repeat fontSize="small" style={{ color: "tomato" }} />
               </ListItemIcon>
-              今天 {moment().add(9, "hours").format("dddd, HH:mm")}
+              {t("today")} {moment().add(9, "hours").format("dddd, HH:mm")}
             </MenuItem>
             <MenuItem onClick={(e) => closeNoticeMenu(e, "tomorrow")}>
               <ListItemIcon>
@@ -475,7 +443,7 @@ const Rightbar: React.FC<rightbarProps> = ({ currentTodoId }) => {
               </ListItemIcon>
               <Typography   component={'span'} 
               variant="inherit" noWrap>
-                明天 {moment().add(1, "days").format("dddd, HH:mm")}
+               {t("tomorrow")} {moment().add(1, "days").format("dddd, HH:mm")}
               </Typography>
             </MenuItem>
             <MenuItem onClick={(e) => closeNoticeMenu(e, "nextWeek")}>
@@ -483,7 +451,7 @@ const Rightbar: React.FC<rightbarProps> = ({ currentTodoId }) => {
                 <FastForward fontSize="small" style={{ color: "tomato" }} />
               </ListItemIcon>
               <Typography   component={'span'} variant="inherit" noWrap>
-                下週 {moment().add(1, "weeks").format("dddd, HH:mm")}
+              {t("next_week")} {moment().add(1, "weeks").format("dddd, HH:mm")}
               </Typography>
             </MenuItem>
             <MenuItem onClick={(e) => closeNoticeMenu(e, "custom")}>
@@ -493,7 +461,7 @@ const Rightbar: React.FC<rightbarProps> = ({ currentTodoId }) => {
               <TextField
                 inputRef={noticeCustomRef}
                 id="datetime-local"
-                label="挑選時間"
+                label={t('pick_time')}
                 type="datetime-local"
                 defaultValue="自選時間"
                 InputLabelProps={{
@@ -516,8 +484,8 @@ const Rightbar: React.FC<rightbarProps> = ({ currentTodoId }) => {
             style={currentTodo?.dueTime ? { color: "tomato" } : undefined}
             primary={
               currentTodo?.dueTime
-                ? "於 " + moment(currentTodo.dueTime).format("MM-DD-HH:mm") + " 到期"
-                : "到期日"
+                ?  moment(currentTodo.dueTime).format("MM-DD-HH:mm") +t("dueDate") 
+                :t("dueDate")
             }
           />
           <Menu
@@ -533,14 +501,14 @@ const Rightbar: React.FC<rightbarProps> = ({ currentTodoId }) => {
               <ListItemIcon>
                 <Repeat fontSize="small" style={{ color: "tomato" }} />
               </ListItemIcon>
-              今天 {moment().add(9, "hours").format("dddd, HH:mm")}
+              {t("today")} {moment().add(9, "hours").format("dddd, HH:mm")}
             </MenuItem>
             <MenuItem onClick={(e) => closeDueDateMenu(e, "tomorrow")}>
               <ListItemIcon>
                 <Forward fontSize="small" style={{ color: "tomato" }} />
               </ListItemIcon>
               <Typography component={'span'}  variant="inherit" noWrap>
-                明天 {moment().add(1, "days").format("dddd, HH:mm")}
+              {t("tomorrow")}  {moment().add(1, "days").format("dddd, HH:mm")}
               </Typography>
             </MenuItem>
             <MenuItem onClick={(e) => closeDueDateMenu(e, "nextWeek")}>
@@ -548,7 +516,7 @@ const Rightbar: React.FC<rightbarProps> = ({ currentTodoId }) => {
                 <FastForward fontSize="small" style={{ color: "tomato" }} />
               </ListItemIcon>
               <Typography   component={'span'} variant="inherit" noWrap>
-                下週 {moment().add(1, "weeks").format("dddd, HH:mm")}
+              {t("next_week")} {moment().add(1, "weeks").format("dddd, HH:mm")}
               </Typography>
             </MenuItem>
             <MenuItem onClick={(e) => closeDueDateMenu(e, "custom")}>
@@ -558,7 +526,7 @@ const Rightbar: React.FC<rightbarProps> = ({ currentTodoId }) => {
               <TextField
                 inputRef={dueCustomRef}
                 id="datetime-local"
-                label="挑選時間"
+                label={t('pick_time')}
                 type="datetime-local"
                 defaultValue="自選時間"
                 InputLabelProps={{
@@ -584,7 +552,7 @@ const Rightbar: React.FC<rightbarProps> = ({ currentTodoId }) => {
       >
         <TextField
           id="noteTodo"
-          label="新增記事"
+          label= {t('addNote')}
           onBlur={() => updateTodoNote()}
           onKeyPress={(e) => keypressUpdateTodoNote(e)}
           multiline={true}
