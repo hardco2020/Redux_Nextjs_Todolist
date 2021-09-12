@@ -2,7 +2,7 @@ FROM node:14 As Production
 
 ENV NODE_ENV=production
 
-WORKDIR /user/src/api
+WORKDIR /user/src/client
 
 COPY package.json .
 COPY yarn.lock .
@@ -13,9 +13,6 @@ RUN yarn global add typescript
 COPY . .
 
 RUN yarn build
-COPY .env ./dist/
 WORKDIR ./dist
 
-
-
-CMD node src/index.js
+CMD yarn start
