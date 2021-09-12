@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:11.5
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=12345
+      - POSTGRES_DB=todo
+    ports:
+      - 5432:5432
+    networks:
+      - shared-network
+    volumes:
+      - ./postgres-db:var/lib/postgresql/data
+
+  api:
+    container_name: todo_api
+    restart: unless-stopped
+    image: todo-api-prod:1.0.0
+    build:
+      context: todolist-server
+      target : production
+      dockerfile: dockerfile   
+    ports:
+      - 3000:3000
+    networks:
+      - shared-network
+    depends_on:
+      - postgres
+  client:
+    container_name: todo_client
+    restart: unless-stopped
+    image: todo-client-prod:1.0.0
+    build:
+      context: todolist-web/my-app
+      target : production
+      dockerfile: dockerfile   
+    ports:
+      - 3001:3001
+    networks:
+      - shared-network
+    depends_on:
+      - api
+networks:
+  shared-network:
