@@ -1,0 +1,18 @@
+FROM node:14 As Production
+
+ENV NODE_ENV=production
+
+WORKDIR /user/src/client
+
+COPY package.json .
+COPY yarn.lock .
+
+
+RUN yarn install
+RUN yarn global add typescript
+COPY . .
+
+RUN yarn build
+WORKDIR ./dist
+
+CMD yarn start
