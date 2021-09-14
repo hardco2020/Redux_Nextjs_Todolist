@@ -8,7 +8,7 @@ import {
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Cookies from 'js-cookie'
-import { useState } from "react";
+// import { useState } from "react";
 import Signup from "./pages/Signup";
 // mobile
 //right bar overlap on feed
@@ -16,7 +16,7 @@ import Signup from "./pages/Signup";
 // web
 // left / feed / right
 function App() {
-  const [ auth  , setAuth ] = useState<string|undefined>(Cookies.get('user'))
+  // const [ auth  , setAuth ] = useState<string|undefined>(Cookies.get('user'))
   axios.defaults.baseURL = 'http://localhost:3001';
   return (
     <Router>
@@ -29,7 +29,7 @@ function App() {
            <Signup/>
           </Route>
         <Route  path="/list/:id">
-         {auth!==undefined ? <Home/> : <Login/>}
+         {Cookies.get('user')!==undefined ? <Home/> : <Login/>}
         </Route>
             </Switch>
     </Router>

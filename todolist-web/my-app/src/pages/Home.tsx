@@ -72,7 +72,7 @@ const Home: React.FC<homeProps> =({categoryId})=> {
     if(userId!==undefined){
       dispatch(getTodosByUser(userId))
     }
-  }, [])
+  }, [dispatch])
   //加入search控制在此處
   //when true mean sidebar is wild 
   return (

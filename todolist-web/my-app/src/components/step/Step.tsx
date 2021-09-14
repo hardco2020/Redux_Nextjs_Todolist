@@ -3,7 +3,7 @@ import { RadioButtonUnchecked, CheckCircle, Clear } from "@material-ui/icons"
 import { useRef } from "react";
 import { useAppDispatch } from "../../redux/hook";
 import { DeleteStepById, UpdateStepById } from "../../redux/stepSlice";
-import { payloadStep, step,Todo} from "../../type";
+import { step,Todo} from "../../type";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({

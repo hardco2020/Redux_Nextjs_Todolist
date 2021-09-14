@@ -39,14 +39,13 @@ import { useAppDispatch, useAppSelector } from "../../redux/hook";
 import { RootState } from "../../redux/reduxStore";
 import { AddStepsByTodo, getStepsByTodo, seeSteps } from "../../redux/stepSlice";
 import {
-  updateTodo,
   UpdateTodosByTodoID,
   AddTodosToCatgory,
   DeleteTodosToCatgory,
   CompleteTodosByTodoID,
   DeleteTodosByTodoID
 } from "../../redux/todoSlice";
-import { Todo,payloadStep } from "../../type";
+import { Todo } from "../../type";
 import Step from "../step/Step";
 
 

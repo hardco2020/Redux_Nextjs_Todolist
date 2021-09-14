@@ -11,8 +11,6 @@ services:
       - 5432:5432
     networks:
       - shared-network
-    volumes:
-      - ./postgres-db:var/lib/postgresql/data
 
   api:
     container_name: todo_api
@@ -23,7 +21,7 @@ services:
       target : production
       dockerfile: dockerfile   
     ports:
-      - 3000:3000
+      - 3001:3001
     networks:
       - shared-network
     depends_on:
@@ -37,10 +35,10 @@ services:
       target : production
       dockerfile: dockerfile   
     ports:
-      - 3001:3001
+      - 3000:3000
     networks:
       - shared-network
-    depends_on:
-      - api
+    # depends_on:
+    #   - api
 networks:
   shared-network:

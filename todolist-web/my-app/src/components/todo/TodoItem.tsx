@@ -5,7 +5,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { seeCategories } from '../../redux/categorySlice'
 import { useAppDispatch, useAppSelector } from '../../redux/hook'
-import { AddTodosToCatgory, CompleteTodosByTodoID, DeleteTodosToCatgory, updateTodo } from '../../redux/todoSlice'
+import { AddTodosToCatgory, CompleteTodosByTodoID, DeleteTodosToCatgory } from '../../redux/todoSlice'
 import { Todo } from '../../type'
 
 const useStyles = makeStyles((theme: Theme) =>
