@@ -22,7 +22,7 @@ import {
   RadioButtonUnchecked,
   SearchOutlined,
 } from "@material-ui/icons";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../redux/hook";
@@ -156,6 +156,8 @@ const Feed: React.FC<feedProps> = ({
     if (category && category.name !== "plan") {
       if(todo.categories!==undefined){
         return todo.categories.some((c)=>c.name===category.name)
+      }else{
+        return null
       }
     } else {
       //回傳有到期日的旋向

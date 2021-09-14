@@ -14,11 +14,11 @@ import {
   import { LockOutlined } from "@material-ui/icons";
   import { Formik,Form, useField, FieldAttributes } from "formik";
   import { useTranslation } from "react-i18next";
-  import { useSelector } from "react-redux";
+  // import { useSelector } from "react-redux";
   import { Link, useHistory } from "react-router-dom";
   import LanguageOption from "../components/language/language";
   import { useAppDispatch } from "../redux/hook";
-  import { RootState } from "../redux/reduxStore";
+  // import { RootState } from "../redux/reduxStore";
   import { signUpAction } from '../redux/userSlice'
   import  Cookies from 'js-cookie'
   const useStyles = makeStyles((theme: Theme) => ({
@@ -87,7 +87,7 @@ import {
     const { t } = useTranslation();
     //--------------Redux
     const history = useHistory();
-    const { entities,error} = useSelector((state:RootState)=> state.user)
+    // const { entities,error} = useSelector((state:RootState)=> state.user)
     const dispatch = useAppDispatch();
     return (
       <Grid className={classes.container}>

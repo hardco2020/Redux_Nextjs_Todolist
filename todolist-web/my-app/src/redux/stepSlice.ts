@@ -1,8 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios'
-import { payloadAddCategory } from '../type'
 import { RootState } from './reduxStore'
-import { DeleteTodosByTodoID } from './todoSlice'
 
 // Sample types that will be used
 export interface Step {

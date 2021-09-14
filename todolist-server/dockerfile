@@ -14,8 +14,9 @@ COPY . .
 
 RUN yarn build
 COPY .env ./dist/
+COPY wait-for-it.sh ./dist/ 
 WORKDIR ./dist
 
 
-
-CMD node src/index.js
+CMD ["./wait-for-it.sh", "postgres:5432", "--", "node",  "src/index.js"]
+# CMD node src/index.js

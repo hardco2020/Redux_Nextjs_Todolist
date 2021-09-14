@@ -8,11 +8,10 @@ import {
   Typography,
 } from "@material-ui/core";
 import { Dns } from "@material-ui/icons";
-import { id } from "date-fns/locale";
 import React, { useRef, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { DeleteCategoryById, updateCategoryAction } from "../../redux/categorySlice";
-import { deleteTodoByRelated} from "../../redux/todoSlice"
+// import { deleteTodoByRelated} from "../../redux/todoSlice"
 import { useAppDispatch } from "../../redux/hook";
 import { category, Todo } from "../../type";
 

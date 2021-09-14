@@ -25,7 +25,7 @@ import {
 import Cookies from "js-cookie";
 import React, { useEffect, useRef } from "react";
 import { useState } from "react";
-import { useCookies } from "react-cookie";
+// import { useCookies } from "react-cookie";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { AddCategoryByUser, getCategoryByUser, seeCategories } from "../../redux/categorySlice";
@@ -167,7 +167,7 @@ const Sidebar: React.FC<sidebarProps> = ({sidebarTextState,setSidebarTextState,s
 
   useEffect(() => {
       dispatch(getCategoryByUser(Cookies.get('user')||"1"))
-  }, [])
+  }, [dispatch])
   return (
     <Container className={classes.container}>
       <div className={classes.sidebarHeader}>
