@@ -14,7 +14,7 @@ services:
   api:
     container_name: todo_api
     restart: unless-stopped
-    image: todo-api-prod:1.0.0
+    image: school021195/docker-todolist:latest
     build:
       context: todolist-server
       target : production
@@ -24,11 +24,11 @@ services:
     networks:
       - shared-network
     # depends_on:
-    #   - db
+    #  - db
   client:
     container_name: todo_client
     restart: unless-stopped
-    image: todo-client-prod:1.0.0
+    image: school021195/docker-todolist:frontend
     build:
       context: todolist-web/my-app
       target : production
