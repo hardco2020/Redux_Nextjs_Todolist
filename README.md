@@ -12,7 +12,7 @@
 
 ## Responsive Website
 - RWD website( still have a few bug when using mobile)
-![](https://github.com/hardco2020/Redux_Nextjs_Todolist/blob/main/responsive_show.png)
+<img src="https://github.com/hardco2020/Redux_Nextjs_Todolist/blob/main/responsive_show.png" alt="drawing" width="400"/>
 
 ## User story 
 - User can search the todolist to find the undone tasks.
@@ -24,7 +24,8 @@
 - WebsiteLink http://5.181.217.243:3000/list/1
 
 ## Preivew 
-![](https://github.com/hardco2020/Redux_Nextjs_Todolist/blob/main/螢幕錄製%202021-09-15%20下午7.50.25.gif)
+<img src="https://github.com/hardco2020/Redux_Nextjs_Todolist/blob/main/螢幕錄製%202021-09-15%20下午7.50.25.gif" alt="drawing" width="400"/>
+
 ## Develop environment
 - Node v16.3.0 
 
