@@ -119,7 +119,7 @@ const Login: React.FC = () => {
                 console.log(user.account)
                 Cookies.set('user',user.account)
                 history.push('/list/1')
-                window.location.reload();
+                // window.location.reload();
             }else{
               if(response.payload?.msg.includes("Password")){
                 setErrors({password:response.payload?.msg}) 
@@ -167,13 +167,14 @@ const Login: React.FC = () => {
               <Button
                 disabled={isSubmitting}
                 type="submit"
-                fullWidth={true}
-                style={{ color: "white", backgroundColor: "tomato",cursor:"pointer" }}
+                // fullWidth={true}
+                style={{ color: "white", backgroundColor: "tomato", cursor:'pointer' }}
                 variant="contained"
                 className={classes.accountField}
               >
                {isSubmitting===true ? <CircularProgress size="20px" />: t("submit_button")}
               </Button>
+              
               <Typography className={classes.accountField}> {t('signupTip')}
                       <Link to="/signup">
                           {t('signup')}
