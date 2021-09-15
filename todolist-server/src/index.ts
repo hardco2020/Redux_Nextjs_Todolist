@@ -73,8 +73,8 @@ const main = async()=>{
     app.use(todoRouter)
     app.use(categoryRouter)
     app.use(stepRouter)
-    app.listen(3001,()=>{
-        console.log("server will be started port")
+    app.listen(process.env.PORT,()=>{
+        console.log("server will be started port",process.env.PORT)
     })
 
 

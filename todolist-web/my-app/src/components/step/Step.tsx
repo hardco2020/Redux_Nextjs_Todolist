@@ -30,7 +30,8 @@ const Step:React.FC<StepProps> = ({step,currentTodo})=>{
         const updateStep = {
           id: step.id,
           title:step.title,
-          completed:!step.completed
+          completed:!step.completed,
+          todoItem:currentTodo
         };
         dispatch(UpdateStepById(updateStep));
     };

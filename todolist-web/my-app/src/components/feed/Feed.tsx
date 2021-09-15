@@ -155,7 +155,7 @@ const Feed: React.FC<feedProps> = ({
   const todos = useAppSelector(showTodo).filter((todo) => {
     if (category && category.name !== "plan") {
       if(todo.categories!==undefined){
-        return todo.categories.some((c)=>c.name===category.name)
+        return todo.categories.some((c)=>c.id===category.id)
       }else{
         return null
       }

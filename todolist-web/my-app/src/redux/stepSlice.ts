@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios'
+import { Todo } from '../type'
 import { RootState } from './reduxStore'
 
 // Sample types that will be used
@@ -7,6 +8,7 @@ export interface Step {
   id:string;
   title:string;
   completed:boolean
+  todoItem?:Todo
 }
 
 export interface payloadStep{
@@ -19,9 +21,9 @@ export interface payloadAddStep{
 }
 
 
-export const getStepsByTodo = createAsyncThunk<Step[],string>('step/get',async(todoId)=>{
+export const getStepsByUser = createAsyncThunk<Step[],string>('step/get',async(userId)=>{
     try{
-        const response = await axios.get(`/api/todo/${todoId}/step`)
+        const response = await axios.get(`/api/user/${userId}/step`)
         return response.data
     }catch(err:any){
         console.log(err)
@@ -66,7 +68,7 @@ const StepSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     // The `builder` callback form is used here because it provides correctly typed reducers from the action creators
-    builder.addCase(getStepsByTodo.fulfilled, (state, { payload }) => {
+    builder.addCase(getStepsByUser.fulfilled, (state, { payload }) => {
        state.steps = payload
     })
     builder.addCase(AddStepsByTodo.fulfilled,(state, {payload} )=>{

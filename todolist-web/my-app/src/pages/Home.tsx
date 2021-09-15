@@ -7,6 +7,7 @@ import Header from "../components/header/Header";
 import Rightbar from "../components/rightbar/Rightbar";
 import Sidebar from "../components/sidebar/Sidebar";
 import { useAppDispatch } from "../redux/hook";
+import { getStepsByUser } from "../redux/stepSlice";
 import { getTodosByUser } from "../redux/todoSlice";
 
 export interface homeProps{
@@ -71,6 +72,7 @@ const Home: React.FC<homeProps> =({categoryId})=> {
     const userId = Cookies.get('user')
     if(userId!==undefined){
       dispatch(getTodosByUser(userId))
+      dispatch(getStepsByUser(userId))
     }
   }, [dispatch])
   //加入search控制在此處

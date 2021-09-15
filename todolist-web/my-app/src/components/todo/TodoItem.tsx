@@ -5,6 +5,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { seeCategories } from '../../redux/categorySlice'
 import { useAppDispatch, useAppSelector } from '../../redux/hook'
+import { seeSteps } from '../../redux/stepSlice'
 import { AddTodosToCatgory, CompleteTodosByTodoID, DeleteTodosToCatgory } from '../../redux/todoSlice'
 import { Todo } from '../../type'
 
@@ -70,6 +71,14 @@ interface TodoItemProp{
     setCurrentTodoId: React.Dispatch<React.SetStateAction<string | null>>;
 }
 const TodoItem:React.FC<TodoItemProp> = ({todo,completed,setCurrentTodoId})=> {
+    //找到step
+    const steps = useAppSelector(seeSteps).filter((step)=> {
+      if(step.todoItem){
+        return step.todoItem.id ===todo.id
+      }
+      return null
+    })
+    console.log(steps)
     const {t} = useTranslation();
     const dispatch = useAppDispatch();
     const importantCategory = useAppSelector(seeCategories).find((c)=>c.name==="important")
@@ -77,34 +86,19 @@ const TodoItem:React.FC<TodoItemProp> = ({todo,completed,setCurrentTodoId})=> {
         if(importantCategory){
           dispatch(AddTodosToCatgory({todoId:todo.id,categoryId:importantCategory.id}))
         }
-        //原本有跟原本沒有的狀況
-        // let new_cat: number[];
-        // if (todo.categories !== undefined) {
-        //   new_cat = [...todo.categories, 2];
-        // } else {
-        //   new_cat = [2];
-        // }
-        // const newTodo: Todo = { ...todo, categories: new_cat };
-        // dispatch(updateTodo(newTodo));
+
       };
       const deleteImportantCategory = (todo: Todo) => {
         if(importantCategory){
           dispatch(DeleteTodosToCatgory({todoId:todo.id,categoryId:importantCategory.id}))
         }
-        // if (todo.categories !== undefined) {
-        //   const new_cat = todo.categories.filter((c) => c !== 2);
-        //   const newTodo: Todo = { ...todo, categories: new_cat };
-        //   dispatch(updateTodo(newTodo));
-        // } else {
-        //   console.log("不用親增");
-        // }
+      
     };
     const completeTodo = (event:React.MouseEvent<SVGSVGElement, MouseEvent>)=>{
       event.stopPropagation();
       dispatch(CompleteTodosByTodoID({todoId:todo.id,completed:completed}))
     }
     const classes = useStyles();
-    console.log("re-render?")
     return (
         <>
         <ListItem
@@ -127,9 +121,10 @@ const TodoItem:React.FC<TodoItemProp> = ({todo,completed,setCurrentTodoId})=> {
             style = {completed===true ? { textDecoration: "line-through", color: "gray" } : undefined}
             primary={todo.title}
             secondary={
-              (todo.noticeTime || todo.dueTime || todo.note || todo.steps) &&
+              (todo.noticeTime || todo.dueTime || todo.note || steps.length>0) &&
               <React.Fragment>
                 <ListItem className={classes.subTodoItem}>
+
                   {todo.noticeTime && (
                     <>
                       <Notifications className={classes.subTodoIcon} />
@@ -184,7 +179,7 @@ const TodoItem:React.FC<TodoItemProp> = ({todo,completed,setCurrentTodoId})=> {
                       </Typography>
                     </>
                   )}
-                  {todo.steps && todo.steps.length > 0 && (
+                  { steps && steps.length > 0 && (
                     <>
                       <MoreVert className={classes.subTodoIcon} />
                       <Typography
@@ -193,11 +188,11 @@ const TodoItem:React.FC<TodoItemProp> = ({todo,completed,setCurrentTodoId})=> {
                         className={classes.subTodoText}
                       >
                         {
-                          todo.steps.filter(
+                          steps.filter(
                             (step) => step.completed === true
                           ).length
                         }{" "}
-                        / {todo.steps.length}
+                        / {steps.length}
                       </Typography>
                     </>
                   )}

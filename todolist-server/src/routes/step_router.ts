@@ -1,4 +1,5 @@
 import express from 'express'
+import { getRepository } from 'typeorm';
 import { Step } from '../entities/step';
 import { TodoItem } from '../entities/TodoItem';
 const router =  express.Router();
@@ -24,6 +25,19 @@ router.post('/api/todo/:todoId/step',async(req:express.Request,res:express.Respo
 router.get('/api/todo/:todoId/step',async(req:express.Request,res:express.Response)=>{
     const { todoId } = req.params
     const steps = await Step.find({where:{todoItem:todoId}})
+    return res.status(200).json(steps)
+});
+//show user's step
+router.get('/api/user/:userId/step',async(req:express.Request,res:express.Response)=>{
+    const { userId } = req.params
+    const steps = await getRepository(Step)
+    .createQueryBuilder("steps")
+    .leftJoinAndSelect('steps.todoItem', 'todoItem')
+    .leftJoin('todoItem.categories', 'categories')
+    .leftJoin('categories.user','user')
+    .where('user.account=:id',{id: userId})
+    .distinct(true)
+    .getMany();
     return res.status(200).json(steps)
 });
 //update step
