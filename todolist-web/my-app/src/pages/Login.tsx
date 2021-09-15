@@ -119,7 +119,7 @@ const Login: React.FC = () => {
                 console.log(user.account)
                 Cookies.set('user',user.account)
                 history.push('/list/1')
-                // window.location.reload();
+                window.location.reload();
             }else{
               if(response.payload?.msg.includes("Password")){
                 setErrors({password:response.payload?.msg}) 
