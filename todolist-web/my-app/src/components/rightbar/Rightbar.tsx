@@ -30,14 +30,14 @@ import {
   WbSunny,
 } from "@material-ui/icons";
 import moment from "moment";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { seeCategories } from "../../redux/categorySlice";
 import { useAppDispatch, useAppSelector } from "../../redux/hook";
 import { RootState } from "../../redux/reduxStore";
-import { AddStepsByTodo, getStepsByTodo, seeSteps } from "../../redux/stepSlice";
+import { AddStepsByTodo , seeSteps } from "../../redux/stepSlice";
 import {
   UpdateTodosByTodoID,
   AddTodosToCatgory,
@@ -66,6 +66,7 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     listItem: {},
     checkIcon: {
+      cursor:"pointer",
       color: "tomato",
       marginRight: theme.spacing(1),
     },
@@ -107,7 +108,12 @@ const Rightbar: React.FC<rightbarProps> = ({ currentTodoId,setCurrentTodoId }) =
   // global state management
 
   const category = useAppSelector(seeCategories).find((c)=>c.name==="myday")
-  const steps = useAppSelector(seeSteps)
+  const steps = useAppSelector(seeSteps).filter((step)=>{
+    if(step.todoItem){
+      return step.todoItem.id === currentTodoId
+    }
+    return null
+  });
   const { t } = useTranslation(); 
   const todos = useSelector((state: RootState) =>
     state.todo.todos.filter((todo) => todo.id === currentTodoId)
@@ -204,11 +210,11 @@ const Rightbar: React.FC<rightbarProps> = ({ currentTodoId,setCurrentTodoId }) =
     setAnchorDueDate(null);
   };
   
-  useEffect(() => {
-    if(currentTodoId){
-      dispatch(getStepsByTodo(currentTodoId))
-    }
-  }, [currentTodoId,dispatch])
+  // useEffect(() => {
+  //   if(currentTodoId ){
+  //     dispatch(getStepsByTodo(currentTodoId))
+  //   }
+  // }, [currentTodoId,dispatch])
   // useEffect(() => {
   //   if (updateTitle.current !== null && currentTodo !== null) {
   //     updateTitle.current.value = currentTodo?.title;
@@ -316,12 +322,12 @@ const Rightbar: React.FC<rightbarProps> = ({ currentTodoId,setCurrentTodoId }) =
           {currentTodo && currentTodo.completed === false ? (
             <RadioButtonUnchecked
               className={classes.checkIcon}
-              onClick={() => dispatch(CompleteTodosByTodoID({todoId:currentTodo.id,completed:true}))}
+              onClick={() => dispatch(CompleteTodosByTodoID({todoId:currentTodo.id,completed:currentTodo.completed}))}
             />
           ) : (
             <CheckCircle
               className={classes.checkIcon}
-              onClick={() => dispatch(CompleteTodosByTodoID({todoId:currentTodo.id,completed:false}))}
+              onClick={() => dispatch(CompleteTodosByTodoID({todoId:currentTodo.id,completed:currentTodo.completed}))}
             />
           )}
           <TextField
