@@ -11,7 +11,7 @@ import {
   Theme,
   Typography,
 } from "@material-ui/core";
-import { LockOutlined } from "@material-ui/icons";
+import { LockOutlined, SettingsEthernet } from "@material-ui/icons";
 import { Formik,Form, useField, FieldAttributes } from "formik";
 import { useTranslation } from "react-i18next";
 // import { useSelector } from "react-redux";
@@ -21,6 +21,8 @@ import { useAppDispatch } from "../redux/hook";
 // import { RootState } from "../redux/reduxStore";
 import { loginAction } from '../redux/userSlice'
 import  Cookies from 'js-cookie'
+import { stringify } from "querystring";
+import { useState } from "react";
 const useStyles = makeStyles((theme: Theme) => ({
   paperStyle: {
     padding: 20,
@@ -64,6 +66,7 @@ const AccountField: React.FC<FieldAttributes<{}>> = ({
 }) => {
   const classes = useStyles();
   const [field, meta] = useField<{}>(props);
+  // const [test,setTest] = useState<string|null>(null)
   const errorText = meta.error && meta.touched ? meta.error : "";
   return (
     // {!!errorText} string empty return false
@@ -83,6 +86,7 @@ const AccountField: React.FC<FieldAttributes<{}>> = ({
 
 const Login: React.FC = () => {
   // ---------------------------CSS
+  // const [test,setTest] = useState<string|null>(null)
   const classes = useStyles();
   const { t } = useTranslation();
   //--------------Redux
@@ -91,6 +95,7 @@ const Login: React.FC = () => {
   const dispatch = useAppDispatch();
   return (
     <Grid className={classes.container}>
+      {/* <p>{test}</p> */}
       <div className={classes.logo}>
         <Typography variant="h2" style={{ color: "tomato" }}>
           {" "}
@@ -112,6 +117,7 @@ const Login: React.FC = () => {
           initialValues={{ account: "", password: "" }}
           onSubmit={async(data, { setSubmitting, resetForm,setErrors }) => {
             setSubmitting(true);
+            // setTest("456");
             //make async call
             const response = await dispatch(loginAction({account:data.account,password:data.password}))
             if(loginAction.fulfilled.match(response)){
@@ -128,6 +134,7 @@ const Login: React.FC = () => {
               }
             }
             setSubmitting(false);
+            // setTest("789");
             //如果登入成功？
             //登入失敗要處理錯誤訊息
             // resetForm(); //重置

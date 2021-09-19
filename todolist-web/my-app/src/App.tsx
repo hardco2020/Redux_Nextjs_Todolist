@@ -17,7 +17,7 @@ import Signup from "./pages/Signup";
 // left / feed / right
 function App() {
   // const [ auth  , setAuth ] = useState<string|undefined>(Cookies.get('user'))
-  axios.defaults.baseURL = 'http://localhost:3001';
+  axios.defaults.baseURL = 'http://5.181.217.243:3001';
   return (
     <Router>
       <Switch>
