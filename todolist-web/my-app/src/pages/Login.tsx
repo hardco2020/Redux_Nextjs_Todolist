@@ -11,7 +11,7 @@ import {
   Theme,
   Typography,
 } from "@material-ui/core";
-import { LockOutlined, SettingsEthernet } from "@material-ui/icons";
+import { LockOutlined } from "@material-ui/icons";
 import { Formik,Form, useField, FieldAttributes } from "formik";
 import { useTranslation } from "react-i18next";
 // import { useSelector } from "react-redux";
@@ -21,8 +21,6 @@ import { useAppDispatch } from "../redux/hook";
 // import { RootState } from "../redux/reduxStore";
 import { loginAction } from '../redux/userSlice'
 import  Cookies from 'js-cookie'
-import { stringify } from "querystring";
-import { useState } from "react";
 const useStyles = makeStyles((theme: Theme) => ({
   paperStyle: {
     padding: 20,
